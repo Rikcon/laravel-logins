@@ -46,8 +46,10 @@ class LoginsServiceProvider extends ServiceProvider
             __DIR__.'/../config/logins.php' => config_path('logins.php'),
         ], 'logins-config');
 
-        // Load migrations
-        $this->loadMigrationsFrom(__DIR__ . '/../database/migrations');
+        // Allow publishing migrations
+        $this->publishes([
+            __DIR__.'/../database/migrations' => database_path('migrations'),
+        ], 'logins-migrations');
 
         // Configure our authentication guard
         $this->configureGuard();

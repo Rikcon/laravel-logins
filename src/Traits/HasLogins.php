@@ -4,6 +4,7 @@ namespace ALajusticia\Logins\Traits;
 
 use ALajusticia\Logins\CurrentLogin;
 use ALajusticia\Logins\Models\Login;
+use Config;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Laravel\Sanctum\HasApiTokens;
@@ -20,13 +21,15 @@ trait HasLogins
      */
     public function logins(): MorphMany
     {
-        return $this->morphMany(Login::class, 'authenticatable');
+        $modelClass = Config::get('logins.logins_model');
+
+        return $this->morphMany($modelClass, 'authenticatable');
     }
 
     /**
      * Get the current user's login.
      */
-    public function getCurrentLoginAttribute(): ?Login
+    public function getCurrentLoginAttribute()
     {
         return app(CurrentLogin::class)->currentLogin;
     }

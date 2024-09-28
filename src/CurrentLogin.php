@@ -2,13 +2,12 @@
 
 namespace ALajusticia\Logins;
 
-use ALajusticia\Logins\Models\Login;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Config;
 
 class CurrentLogin
 {
-    public ?Login $currentLogin = null;
+    public $currentLogin = null;
 
     public function __construct()
     {

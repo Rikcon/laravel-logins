@@ -4,7 +4,6 @@ namespace ALajusticia\Logins;
 
 use ALajusticia\Logins\Events\LoggedIn;
 use ALajusticia\Logins\Factories\LoginFactory;
-use ALajusticia\Logins\Models\Login;
 use Illuminate\Auth\Recaller;
 use Illuminate\Contracts\Auth\Authenticatable;
 use Illuminate\Support\Facades\App;
@@ -98,11 +97,12 @@ class Logins
             if (! $user->current_login) {
 
                 // We don't already track the session ID
+                $loginModelClass = config('logins.logins_model');
 
                 if ($loginId = session('login_id')) {
                     // Just logged in
 
-                    $updated = Login::where('id', $loginId)->update([
+                    $updated = $loginModelClass::where('id', $loginId)->update([
                         'session_id' => session()->getId(),
                         'last_activity_at' => now(),
                     ]);
@@ -112,7 +112,7 @@ class Logins
 
                     $recaller = new Recaller($recallerCookie);
 
-                    $updated = Login::where('remember_token', $recaller->token())->update([
+                    $updated = $loginModelClass::where('remember_token', $recaller->token())->update([
                         'session_id' => request()->session()->getId(),
                         'last_activity_at' => now(),
                     ]);

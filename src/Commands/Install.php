@@ -28,6 +28,11 @@ class Install extends Command
      */
     public function handle()
     {
+        if (!Helpers::sanctumIsInstalled()) {
+            $this->error('Laravel Sanctum is not installed!');
+            return;
+        }
+
         if (
             $this->option('quiet')
             || $this->confirm('This will run the database migrations and create the required files for Laravel Logins. Continue?', true)
@@ -35,17 +40,25 @@ class Install extends Command
 
             $this->line('Installing...' . "\n");
 
-            $migrationPaths = [
-                'vendor/alajusticia/laravel-logins/database/migrations',
-            ];
+            if ($this->option('quiet') ||
+                $this->confirm('Do you want to publish config for Laravel Logins?', true)) {
 
-            if (Helpers::sanctumIsInstalled()) {
-                $migrationPaths[] = 'vendor/alajusticia/laravel-logins/database/migrations/sanctum';
+                $this->call('vendor:publish', [
+                    '--provider' => 'ALajusticia\Logins\LoginsServiceProvider',
+                    '--tag' => 'logins-config',
+                ]);
             }
 
-            $options = [
-                '--path' => $migrationPaths,
-            ];
+            if ($this->option('quiet') ||
+                $this->confirm('Do you want to publish migrations for Laravel Logins?', true)) {
+
+                $this->call('vendor:publish', [
+                    '--provider' => 'ALajusticia\Logins\LoginsServiceProvider',
+                    '--tag' => 'logins-migrations',
+                ]);
+            }
+
+            $options = [];
 
             if ($databaseConnection = Config::get('logins.database_connection')) {
                 $options['--database'] = $databaseConnection;
@@ -65,8 +78,8 @@ class Install extends Command
                 (new Filesystem)->ensureDirectoryExists(app_path('Livewire'));
                 (new Filesystem)->ensureDirectoryExists(resource_path('views/livewire'));
 
-                copy(__DIR__.'/../../stubs/jetstream-livewire/app/Livewire/Logins.php', app_path('Livewire/Logins.php'));
-                copy(__DIR__.'/../../stubs/jetstream-livewire/resources/views/livewire/logins.blade.php', resource_path('views/livewire/logins.blade.php'));
+                copy(__DIR__ . '/../../stubs/jetstream-livewire/app/Livewire/Logins.php', app_path('Livewire/Logins.php'));
+                copy(__DIR__ . '/../../stubs/jetstream-livewire/resources/views/livewire/logins.blade.php', resource_path('views/livewire/logins.blade.php'));
             }
 
             $this->info('Installation was successful!');

@@ -12,12 +12,12 @@ use Laravel\Sanctum\Contracts\HasAbilities;
 class LoginFactory
 {
     public static function buildFromLogin(
-        RequestContext $context,
-        string $sessionId,
-        string $guard,
+        RequestContext  $context,
+        string          $sessionId,
+        string          $guard,
         Authenticatable $user,
-        bool $remember,
-    ): Login
+        bool            $remember,
+    )
     {
         $login = self::getNewLoginWithContext($context);
 
@@ -29,8 +29,8 @@ class LoginFactory
         // Set the expiration date based on whether it's a remembered login or not
         $login->expiresAt(
             $remember
-                ? Carbon::now()->addMinutes((int) Config::get('auth.guards.' . $guard . '.remember', 576000)) // Same default value as in the SessionGuard
-                : Carbon::now()->addMinutes((int) Config::get('session.lifetime', 120))
+                ? Carbon::now()->addMinutes((int)Config::get('auth.guards.' . $guard . '.remember', 576000)) // Same default value as in the SessionGuard
+                : Carbon::now()->addMinutes((int)Config::get('session.lifetime', 120))
         );
 
         return $login;
@@ -38,23 +38,25 @@ class LoginFactory
 
     public static function buildFromSanctumToken(
         RequestContext $context,
-        HasAbilities $token
-    ): Login
+        HasAbilities   $token
+    )
     {
         $login = self::getNewLoginWithContext($context);
 
         $login->personal_access_token_id = $token->getKey();
 
         if ($tokenExpiration = Config::get('sanctum.expiration')) {
-            $login->expiresAt(Carbon::now()->addMinutes((int) $tokenExpiration));
+            $login->expiresAt(Carbon::now()->addMinutes((int)$tokenExpiration));
         }
 
         return $login;
     }
 
-    protected static function getNewLoginWithContext(RequestContext $context): Login
+    protected static function getNewLoginWithContext(RequestContext $context)
     {
-        return new Login([
+        $modelClass = config('logins.logins_model');
+
+        return new $modelClass([
             'user_agent' => $context->userAgent(),
             'ip_address' => $context->ipAddress(),
             'device_type' => $context->parser()->getDeviceType(),

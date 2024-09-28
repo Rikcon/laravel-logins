@@ -6,6 +6,10 @@ return [
     // https://github.com/alajusticia/laravel-logins
 
     /*
+     * Logins Model
+     * */
+    'logins_model' => ALajusticia\Logins\Models\Login::class,
+    /*
     |--------------------------------------------------------------------------
     | Database connection
     |--------------------------------------------------------------------------
