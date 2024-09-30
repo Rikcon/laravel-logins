@@ -96,11 +96,9 @@ class Login extends Model
     /**
      * Get the device/token name.
      */
-    protected function device(): Attribute
+    protected function getDeviceAttribute()
     {
-        return Attribute::make(
-            get: fn (?string $value) => ! empty($value) ? $value : $this->personalAccessToken?->name,
-        );
+        return ! empty($this->device) ? $this->device : $this->personalAccessToken?->name;
     }
 
     public function personalAccessToken(): BelongsTo
