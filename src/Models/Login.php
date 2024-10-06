@@ -98,7 +98,7 @@ class Login extends Model
      */
     protected function getDeviceAttribute()
     {
-        return ! empty($this->device) ? $this->device : $this->personalAccessToken?->name;
+        return ! empty($this->attributes['device']) ? $this->attributes['device'] : $this->personalAccessToken?->name;
     }
 
     public function personalAccessToken(): BelongsTo
