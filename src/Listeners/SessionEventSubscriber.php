@@ -13,8 +13,9 @@ class SessionEventSubscriber
      *
      * Dispatched by Laravel on all successful authentication.
      */
-    public function handleSuccessfulAuthentication(\Illuminate\Auth\Events\Authenticated $event): void
-    {
+    public function handleSuccessfulAuthentication(
+        \Illuminate\Auth\Events\Authenticated $event,
+    ): void {
         Logins::checkSessionId($event->user);
     }
 
@@ -23,10 +24,21 @@ class SessionEventSubscriber
      *
      * Dispatched by Laravel on every successful initial or remembered login.
      */
-    public function handleSuccessfulLogin(\Illuminate\Auth\Events\Login $event): void
-    {
-        if (! Auth::viaRemember() && Logins::tracked($event->user)) {
-            Logins::trackLoginFromSession(session()->getId(), $event->guard, $event->user, $event->remember);
+    public function handleSuccessfulLogin(
+        \Illuminate\Auth\Events\Login $event,
+    ): void {
+        if (
+            !Auth::guard($event->guard)->viaRemember() &&
+            Logins::tracked($event->user)
+        ) {
+            Logins::trackLoginFromSession(
+                session()->getId(),
+                $event->guard,
+                $event->user,
+                $event->remember,
+            );
+        } else {
+            Logins::checkSessionId($event->user);
         }
     }
 
@@ -35,14 +47,14 @@ class SessionEventSubscriber
      */
     public function subscribe(Dispatcher $events): void
     {
-        $events->listen(
-            \Illuminate\Auth\Events\Authenticated::class,
-            [SessionEventSubscriber::class, 'handleSuccessfulAuthentication']
-        );
+        $events->listen(\Illuminate\Auth\Events\Authenticated::class, [
+            SessionEventSubscriber::class,
+            "handleSuccessfulAuthentication",
+        ]);
 
-        $events->listen(
-            \Illuminate\Auth\Events\Login::class,
-            [SessionEventSubscriber::class, 'handleSuccessfulLogin']
-        );
+        $events->listen(\Illuminate\Auth\Events\Login::class, [
+            SessionEventSubscriber::class,
+            "handleSuccessfulLogin",
+        ]);
     }
 }
